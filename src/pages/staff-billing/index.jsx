@@ -74,7 +74,7 @@ const StaffBilling = () => {
 
   const handleGenerateBill = async (customerData) => {
     const subtotal = items?.reduce((sum, item) => sum + item?.total, 0);
-    const taxAmount = subtotal * 0.08;
+    const taxAmount = subtotal * 0.18;
     const totalAmount = subtotal + taxAmount;
 
     const billData = {

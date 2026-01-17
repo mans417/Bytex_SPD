@@ -120,7 +120,7 @@ const OwnerDashboard = () => {
     const syncInterval = setInterval(() => {
       setIsSyncing(true);
       setSyncProgress(0);
-      
+
       const progressInterval = setInterval(() => {
         setSyncProgress(prev => {
           if (prev >= 100) {
@@ -146,7 +146,7 @@ const OwnerDashboard = () => {
     // Date range filter
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     if (filters?.dateRange === 'today') {
       filtered = filtered?.filter(t => new Date(t.timestamp) >= today);
     } else if (filters?.dateRange === 'yesterday') {
@@ -180,7 +180,7 @@ const OwnerDashboard = () => {
   const calculateMetrics = () => {
     const totalSales = filteredTransactions?.reduce((sum, t) => sum + t?.totalAmount, 0);
     const totalTransactions = filteredTransactions?.length;
-    
+
     // Calculate today's sales for trend
     const today = new Date();
     today?.setHours(0, 0, 0, 0);
@@ -207,7 +207,7 @@ const OwnerDashboard = () => {
       </Helmet>
       <RoleTransitionHeader />
       <OfflineStatusIndicator />
-      <SyncProgressFeedback 
+      <SyncProgressFeedback
         isSyncing={isSyncing}
         syncProgress={syncProgress}
       />
@@ -234,7 +234,7 @@ const OwnerDashboard = () => {
               title="Total Sales"
               value={new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD'
+                currency: 'INR'
               })?.format(metrics?.totalSales)}
               icon="DollarSign"
               iconColor="bg-success/10 text-success"
@@ -255,7 +255,7 @@ const OwnerDashboard = () => {
               title="Today's Sales"
               value={new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD'
+                currency: 'INR'
               })?.format(metrics?.todaySales)}
               icon="TrendingUp"
               iconColor="bg-accent/10 text-accent"
@@ -266,7 +266,7 @@ const OwnerDashboard = () => {
           </div>
 
           {/* Filter Controls */}
-          <FilterControls 
+          <FilterControls
             onFilterChange={handleFilterChange}
             staffMembers={mockStaffMembers}
           />
@@ -287,7 +287,7 @@ const OwnerDashboard = () => {
               </div>
             </div>
 
-            <TransactionsTable 
+            <TransactionsTable
               transactions={filteredTransactions}
               loading={loading}
             />
@@ -296,9 +296,9 @@ const OwnerDashboard = () => {
           {/* Footer Info */}
           <div className="mt-8 md:mt-10 lg:mt-12 text-center">
             <p className="text-xs md:text-sm text-muted-foreground caption">
-              Data updates in real-time • Last updated: {new Date()?.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+              Data updates in real-time • Last updated: {new Date()?.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
               })}
             </p>
           </div>

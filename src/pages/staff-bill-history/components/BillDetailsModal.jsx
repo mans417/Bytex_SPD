@@ -113,7 +113,7 @@ const BillDetailsModal = ({ isOpen, onClose, billData, onPrint }) => {
               <span className="text-sm font-medium text-foreground data-text">{formatCurrency(billData?.subtotal)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground caption">Tax (8%)</span>
+              <span className="text-sm text-muted-foreground caption">GST (18%)</span>
               <span className="text-sm font-medium text-foreground data-text">{formatCurrency(billData?.tax)}</span>
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-border">
