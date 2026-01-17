@@ -1,5 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { database } from '../../utils/firebase';
 import RoleTransitionHeader from '../../components/ui/RoleTransitionHeader';
 import OfflineStatusIndicator from '../../components/ui/OfflineStatusIndicator';
 import SyncProgressFeedback from '../../components/ui/SyncProgressFeedback';
@@ -14,8 +17,11 @@ const OwnerDashboard = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
   const [filters, setFilters] = useState({ dateRange: 'today', staff: 'all' });
+  const [transactions, setTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [staffMembers, setStaffMembers] = useState([]);
 
-  // Mock data for transactions
+  // Mock data for demonstration/fallback
   const mockTransactions = [
     {
       id: 'TXN001',
@@ -25,96 +31,62 @@ const OwnerDashboard = () => {
         { name: 'Laptop Stand', quantity: 1, price: 45.00 }
       ],
       totalAmount: 126.48,
-      timestamp: new Date('2026-01-13T14:30:00'),
+      timestamp: new Date().getTime(),
       createdBy: 'Sarah Johnson'
     },
     {
       id: 'TXN002',
       items: [
-        { name: 'Mechanical Keyboard', quantity: 1, price: 89.99 },
-        { name: 'Mouse Pad', quantity: 2, price: 15.00 }
+        { name: 'Mechanical Keyboard', quantity: 1, price: 89.99 }
       ],
-      totalAmount: 119.99,
-      timestamp: new Date('2026-01-13T13:45:00'),
-      createdBy: 'Michael Chen'
-    },
-    {
-      id: 'TXN003',
-      items: [
-        { name: 'Webcam HD', quantity: 1, price: 65.00 },
-        { name: 'Microphone', quantity: 1, price: 55.00 },
-        { name: 'Ring Light', quantity: 1, price: 35.00 }
-      ],
-      totalAmount: 155.00,
-      timestamp: new Date('2026-01-13T12:20:00'),
-      createdBy: 'Sarah Johnson'
-    },
-    {
-      id: 'TXN004',
-      items: [
-        { name: 'External SSD 1TB', quantity: 1, price: 120.00 },
-        { name: 'USB Hub', quantity: 2, price: 22.50 }
-      ],
-      totalAmount: 165.00,
-      timestamp: new Date('2026-01-13T11:15:00'),
-      createdBy: 'David Martinez'
-    },
-    {
-      id: 'TXN005',
-      items: [
-        { name: 'Monitor 27 inch', quantity: 1, price: 299.99 },
-        { name: 'HDMI Cable', quantity: 2, price: 18.00 }
-      ],
-      totalAmount: 335.99,
-      timestamp: new Date('2026-01-13T10:30:00'),
-      createdBy: 'Michael Chen'
-    },
-    {
-      id: 'TXN006',
-      items: [
-        { name: 'Wireless Headphones', quantity: 1, price: 79.99 },
-        { name: 'Phone Case', quantity: 3, price: 12.99 }
-      ],
-      totalAmount: 118.96,
-      timestamp: new Date('2026-01-13T09:45:00'),
-      createdBy: 'Sarah Johnson'
-    },
-    {
-      id: 'TXN007',
-      items: [
-        { name: 'Bluetooth Speaker', quantity: 2, price: 45.00 },
-        { name: 'Power Bank', quantity: 1, price: 35.00 }
-      ],
-      totalAmount: 125.00,
-      timestamp: new Date('2026-01-13T08:20:00'),
-      createdBy: 'David Martinez'
-    },
-    {
-      id: 'TXN008',
-      items: [
-        { name: 'Smart Watch', quantity: 1, price: 199.99 },
-        { name: 'Watch Band', quantity: 2, price: 25.00 }
-      ],
-      totalAmount: 249.99,
-      timestamp: new Date('2026-01-12T16:30:00'),
+      totalAmount: 89.99,
+      timestamp: new Date().getTime() - 3600000,
       createdBy: 'Michael Chen'
     }
   ];
 
-  const mockStaffMembers = [
-    { id: 'staff1', name: 'Sarah Johnson' },
-    { id: 'staff2', name: 'Michael Chen' },
-    { id: 'staff3', name: 'David Martinez' }
-  ];
-
-  const [transactions, setTransactions] = useState(mockTransactions);
-  const [filteredTransactions, setFilteredTransactions] = useState(mockTransactions);
-
   useEffect(() => {
-    // Simulate initial data loading
-    setTimeout(() => {
+    // If no database (e.g. env vars missing), use mock data
+    if (!database) {
+      console.warn("Using mock data for Owner Dashboard (Firebase not configured)");
+      setTransactions(mockTransactions);
+
+      // Extract unique staff members from mock
+      const uniqueStaff = [...new Set(mockTransactions.map(bill => bill.createdBy))].map(name => ({
+        id: name,
+        name: name
+      }));
+      setStaffMembers(uniqueStaff);
+
       setLoading(false);
-    }, 1000);
+      return;
+    }
+
+    // Create a reference to the 'bills' collection
+    const billsCollectionRef = collection(database, 'bills');
+    // Create a query to order by timestamp descending
+    const q = query(billsCollectionRef, orderBy('timestamp', 'desc'));
+
+    // Subscribe to real-time updates
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const billsArray = [];
+      snapshot.forEach((doc) => {
+        billsArray.push({ id: doc.id, ...doc.data() });
+      });
+
+      setTransactions(billsArray);
+
+      // Extract unique staff members
+      const uniqueStaff = [...new Set(billsArray.map(bill => bill.createdBy))].map(name => ({
+        id: name,
+        name: name
+      }));
+      setStaffMembers(uniqueStaff);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching bills:", error);
+      setLoading(false);
+    });
 
     // Simulate periodic sync
     const syncInterval = setInterval(() => {
@@ -136,7 +108,11 @@ const OwnerDashboard = () => {
       }, 200);
     }, 45000);
 
-    return () => clearInterval(syncInterval);
+    return () => {
+      // Unsubscribe when component unmounts
+      unsubscribe();
+      clearInterval(syncInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -168,10 +144,7 @@ const OwnerDashboard = () => {
 
     // Staff filter
     if (filters?.staff !== 'all') {
-      const staffMember = mockStaffMembers?.find(s => s?.id === filters?.staff);
-      if (staffMember) {
-        filtered = filtered?.filter(t => t?.createdBy === staffMember?.name);
-      }
+      filtered = filtered?.filter(t => t?.createdBy === filters?.staff);
     }
 
     setFilteredTransactions(filtered);
@@ -239,7 +212,7 @@ const OwnerDashboard = () => {
               icon="DollarSign"
               iconColor="bg-success/10 text-success"
               trend="up"
-              trendValue="+12.5%"
+              trendValue="Live"
               loading={loading}
             />
             <MetricCard
@@ -248,7 +221,7 @@ const OwnerDashboard = () => {
               icon="Receipt"
               iconColor="bg-primary/10 text-primary"
               trend="up"
-              trendValue="+8.3%"
+              trendValue="Live"
               loading={loading}
             />
             <MetricCard
@@ -260,7 +233,7 @@ const OwnerDashboard = () => {
               icon="TrendingUp"
               iconColor="bg-accent/10 text-accent"
               trend="neutral"
-              trendValue=""
+              trendValue="Today"
               loading={loading}
             />
           </div>
@@ -268,7 +241,7 @@ const OwnerDashboard = () => {
           {/* Filter Controls */}
           <FilterControls
             onFilterChange={handleFilterChange}
-            staffMembers={mockStaffMembers}
+            staffMembers={staffMembers}
           />
 
           {/* Transactions Section */}

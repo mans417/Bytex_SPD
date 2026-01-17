@@ -31,8 +31,15 @@ const RoleSelection = () => {
 
   const handleRoleSelect = (route) => {
     setIsTransitioning(true);
+    // Determine role string from route for login page
+    const roleMap = {
+      '/staff-billing': 'staff',
+      '/owner-dashboard': 'owner'
+    };
+
     setTimeout(() => {
-      navigate(route);
+      // Instead of going directly to dashboard, go to login with pre-selected tab
+      navigate('/login', { state: { role: roleMap[route] } });
       setIsTransitioning(false);
     }, 250);
   };

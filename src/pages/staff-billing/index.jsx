@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { ref, push, set } from 'firebase/database';
+import { collection, addDoc } from 'firebase/firestore';
 import { database } from '../../utils/firebase';
 import RoleTransitionHeader from '../../components/ui/RoleTransitionHeader';
 import OfflineStatusIndicator from '../../components/ui/OfflineStatusIndicator';
@@ -48,11 +48,13 @@ const StaffBilling = () => {
       setIsSyncing(true);
       setSyncProgress(0);
 
+      const billsRef = collection(database, 'bills');
+
       for (let i = 0; i < offlineBills?.length; i++) {
         const bill = offlineBills?.[i];
-        const billsRef = ref(database, 'bills');
-        const newBillRef = push(billsRef);
-        await set(newBillRef, { ...bill, synced: true });
+        // Ensure no local ID conflict if Firestore generates one, or we can use setDoc with id
+        // For simplicity, we use addDoc to auto-generate ID
+        await addDoc(billsRef, { ...bill, synced: true });
         setSyncProgress(((i + 1) / offlineBills?.length) * 100);
       }
 
@@ -78,7 +80,8 @@ const StaffBilling = () => {
     const totalAmount = subtotal + taxAmount;
 
     const billData = {
-      id: Date.now(),
+      // id: Date.now(), // Firestore will generate ID, but we keep this for local ref if needed
+      localId: Date.now(),
       customerName: customerData?.customerName,
       customerPhone: customerData?.customerPhone,
       items: items,
@@ -101,9 +104,8 @@ const StaffBilling = () => {
     } else {
       try {
         setIsSyncing(true);
-        const billsRef = ref(database, 'bills');
-        const newBillRef = push(billsRef);
-        await set(newBillRef, { ...billData, synced: true });
+        const billsRef = collection(database, 'bills');
+        await addDoc(billsRef, { ...billData, synced: true });
         setIsSyncing(false);
       } catch (error) {
         console.error('Error saving bill to Firebase:', error);

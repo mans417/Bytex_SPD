@@ -69,8 +69,31 @@ const SecureLoginSetup = () => {
         setupDate: new Date()?.toISOString()
       };
 
+      // Store in localStorage for offline fallback/quick access
       localStorage.setItem('authSetup', JSON.stringify(setupConfig));
 
+      // Store in Firebase Cloud Firestore
+      if (setupMode === 'secure') {
+        const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+        const db = getFirestore(app);
+
+        // Store system settings in 'settings' collection
+        await setDoc(doc(db, 'system', 'settings'), {
+          ...securitySettings,
+          setupMode,
+          updatedAt: Date.now()
+        });
+
+        // Store staff credentials (PIN) securely
+        if (credentials?.staff?.pin) {
+          await setDoc(doc(db, 'system', 'staff'), {
+            pin: credentials?.staff?.pin,
+            updatedAt: Date.now()
+          });
+        }
+      }
+
+      // Create Owner Account in Firebase Auth
       if (setupMode === 'secure' && auth && authMethod === 'password') {
         if (credentials?.owner?.email && credentials?.owner?.password) {
           try {
@@ -80,8 +103,48 @@ const SecureLoginSetup = () => {
               credentials?.owner?.password
             );
             await updateProfile(userCredential?.user, { displayName: 'Owner' });
+
+            // Also store owner profile in DB
+            const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+            const db = getFirestore(app);
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+              role: 'owner',
+              email: credentials.owner.email,
+              createdAt: Date.now()
+            });
+
           } catch (error) {
             console.error('Firebase auth setup error:', error);
+
+            // If account already exists, try to sign in with provided password
+            if (error.code === 'auth/email-already-in-use') {
+              const { signInWithEmailAndPassword } = await import('firebase/auth');
+              try {
+                const userCredential = await signInWithEmailAndPassword(
+                  auth,
+                  credentials?.owner?.email,
+                  credentials?.owner?.password
+                );
+                console.log("Account exists. Signed in successfully. Linking...");
+
+                // Re-write the profile/db data just in case
+                await updateProfile(userCredential?.user, { displayName: 'Owner' });
+
+                const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+                const db = getFirestore(app);
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                  role: 'owner',
+                  email: credentials.owner.email,
+                  updatedAt: Date.now()
+                });
+              } catch (loginError) {
+                console.error("Failed to sign in existing user during setup:", loginError);
+                alert(`The account ${credentials?.owner?.email} already exists, but the password was incorrect. Please try again with the correct password.`);
+                throw loginError; // Stop setup
+              }
+            } else {
+              throw error;
+            }
           }
         }
       }
@@ -92,6 +155,7 @@ const SecureLoginSetup = () => {
       }, 2000);
     } catch (error) {
       console.error('Setup error:', error);
+      alert('Error during setup: ' + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -113,9 +177,8 @@ const SecureLoginSetup = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <button
                 onClick={() => setSetupMode('simple')}
-                className={`p-6 rounded-xl border-2 transition-all text-left ${
-                  setupMode === 'simple' ?'border-primary bg-primary/5' :'border-border hover:border-primary/50'
-                }`}
+                className={`p-6 rounded-xl border-2 transition-all text-left ${setupMode === 'simple' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  }`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-success/10 text-success">
@@ -144,9 +207,8 @@ const SecureLoginSetup = () => {
 
               <button
                 onClick={() => setSetupMode('secure')}
-                className={`p-6 rounded-xl border-2 transition-all text-left ${
-                  setupMode === 'secure' ?'border-primary bg-primary/5' :'border-border hover:border-primary/50'
-                }`}
+                className={`p-6 rounded-xl border-2 transition-all text-left ${setupMode === 'secure' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  }`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary">

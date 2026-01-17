@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env?.VITE_FIREBASE_API_KEY,
@@ -8,7 +8,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env?.VITE_FIREBASE_APP_ID,
-  databaseURL: import.meta.env?.VITE_FIREBASE_DATABASE_URL
+  measurementId: import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Validate Firebase configuration
@@ -17,8 +17,7 @@ const validateFirebaseConfig = () => {
     { key: 'apiKey', env: 'VITE_FIREBASE_API_KEY' },
     { key: 'authDomain', env: 'VITE_FIREBASE_AUTH_DOMAIN' },
     { key: 'projectId', env: 'VITE_FIREBASE_PROJECT_ID' },
-    { key: 'appId', env: 'VITE_FIREBASE_APP_ID' },
-    { key: 'databaseURL', env: 'VITE_FIREBASE_DATABASE_URL' }
+    { key: 'appId', env: 'VITE_FIREBASE_APP_ID' }
   ];
 
   const missingFields = [];
@@ -31,13 +30,6 @@ const validateFirebaseConfig = () => {
     }
   });
 
-  // Validate databaseURL format
-  if (firebaseConfig?.databaseURL && 
-      !firebaseConfig?.databaseURL?.includes('your-firebase') &&
-      !firebaseConfig?.databaseURL?.match(/^https:\/\/.*\.firebaseio\.com$/)) {
-    invalidFields?.push('VITE_FIREBASE_DATABASE_URL (must be https://YOUR-PROJECT.firebaseio.com)');
-  }
-
   if (missingFields?.length > 0 || invalidFields?.length > 0) {
     const errorMessage = [
       '🔥 Firebase Configuration Error:',
@@ -47,14 +39,10 @@ const validateFirebaseConfig = () => {
       '',
       'To fix this:',
       '1. Go to Firebase Console: https://console.firebase.google.com/',
-      '2. Create a new project or select existing one',
+      '2. Select your project: SmartBill Lite',
       '3. Go to Project Settings > General',
       '4. Copy your Firebase configuration',
-      '5. For Realtime Database URL:',
-      '   - Go to Realtime Database section',
-      '   - Create database if not exists',
-      '   - Copy the database URL (format: https://YOUR-PROJECT.firebaseio.com)',
-      '6. Update your .env file with actual values',
+      '5. Update your .env file with actual values',
       '',
       'Example .env format:',
       'VITE_FIREBASE_API_KEY=AIzaSyC...',
@@ -62,8 +50,7 @@ const validateFirebaseConfig = () => {
       'VITE_FIREBASE_PROJECT_ID=your-project-id',
       'VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com',
       'VITE_FIREBASE_MESSAGING_SENDER_ID=123456789',
-      'VITE_FIREBASE_APP_ID=1:123456789:web:abc123',
-      'VITE_FIREBASE_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com'
+      'VITE_FIREBASE_APP_ID=1:123456789:web:abc123'
     ]?.filter(Boolean)?.join('\n');
 
     console.error(errorMessage);
@@ -74,13 +61,23 @@ const validateFirebaseConfig = () => {
 };
 
 let app = null;
-let database = null;
+let db = null;
 
 try {
   if (validateFirebaseConfig()) {
     app = initializeApp(firebaseConfig);
-    database = getDatabase(app);
-    console.log('✅ Firebase initialized successfully');
+    db = getFirestore(app);
+    // Initialize Analytics if supported (safe to ignore errors in Node/Offline)
+    import('firebase/analytics').then(({ getAnalytics }) => {
+      try {
+        const analytics = getAnalytics(app);
+        console.log('✅ Firebase Analytics initialized');
+      } catch (e) {
+        console.warn('Analytics initialization failed (likely offline/unsupported env):', e);
+      }
+    });
+
+    console.log('✅ Firebase (Firestore) initialized successfully');
   } else {
     console.warn('⚠️ Firebase not initialized - using mock mode');
   }
@@ -89,5 +86,5 @@ try {
   console.warn('⚠️ App will run in offline mode');
 }
 
-export { database };
+export { db as database }; // Export as 'database' to minimize breaking changes elsewhere for now
 export default app;
