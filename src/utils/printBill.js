@@ -68,7 +68,7 @@ export const printBill = async (billData) => {
   pdf?.text(`₹${billData?.subtotal?.toFixed(2)}`, pageWidth - 5, yPosition, { align: 'right' });
   yPosition += 5;
 
-  pdf?.text(`Tax (8%):`, 5, yPosition);
+  pdf?.text(`GST (18%):`, 5, yPosition);
   pdf?.text(`₹${billData?.tax?.toFixed(2)}`, pageWidth - 5, yPosition, { align: 'right' });
   yPosition += 5;
 

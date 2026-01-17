@@ -7,38 +7,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--color-border))",
-        input: "hsl(var(--color-input))",
-        ring: "hsl(var(--color-ring))",
-        background: "hsl(var(--color-background))",
-        foreground: "hsl(var(--color-foreground))",
+        border: "var(--color-border)",
+        input: "var(--color-input)",
+        ring: "var(--color-ring)",
+        background: "var(--color-background)",
+        foreground: "var(--color-foreground)",
         primary: {
-          DEFAULT: "hsl(var(--color-primary))",
-          foreground: "hsl(var(--color-primary-foreground))",
+          DEFAULT: "var(--color-primary)",
+          foreground: "var(--color-primary-foreground)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--color-secondary))",
-          foreground: "hsl(var(--color-secondary-foreground))",
+          DEFAULT: "var(--color-secondary)",
+          foreground: "var(--color-secondary-foreground)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--color-destructive))",
-          foreground: "hsl(var(--color-destructive-foreground))",
+          DEFAULT: "var(--color-destructive)",
+          foreground: "var(--color-destructive-foreground)",
         },
         muted: {
-          DEFAULT: "hsl(var(--color-muted))",
-          foreground: "hsl(var(--color-muted-foreground))",
+          DEFAULT: "var(--color-muted)",
+          foreground: "var(--color-muted-foreground)",
         },
         accent: {
-          DEFAULT: "hsl(var(--color-accent))",
-          foreground: "hsl(var(--color-accent-foreground))",
+          DEFAULT: "var(--color-accent)",
+          foreground: "var(--color-accent-foreground)",
         },
         popover: {
-          DEFAULT: "hsl(var(--color-popover))",
-          foreground: "hsl(var(--color-popover-foreground))",
+          DEFAULT: "var(--color-popover)",
+          foreground: "var(--color-popover-foreground)",
         },
         card: {
-          DEFAULT: "hsl(var(--color-card))",
-          foreground: "hsl(var(--color-card-foreground))",
+          DEFAULT: "var(--color-card)",
+          foreground: "var(--color-card-foreground)",
         },
       },
       borderRadius: {
