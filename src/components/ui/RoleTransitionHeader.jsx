@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Icon from '../AppIcon';
 import Button from './Button';
 
 const RoleTransitionHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -31,6 +33,12 @@ const RoleTransitionHeader = () => {
       navigate('/role-selection');
       setIsTransitioning(false);
     }, 250);
+  };
+
+  const handleLogout = async () => {
+    setShowMenu(false);
+    await logout();
+    navigate('/login');
   };
 
   const handleNavigate = (path) => {
@@ -94,9 +102,8 @@ const RoleTransitionHeader = () => {
                       <button
                         key={item?.path}
                         onClick={() => handleNavigate(item?.path)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors ${
-                          location?.pathname === item?.path ? 'bg-muted text-primary' : 'text-foreground'
-                        }`}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors ${location?.pathname === item?.path ? 'bg-muted text-primary' : 'text-foreground'
+                          }`}
                       >
                         <Icon name={item?.icon} size={16} />
                         {item?.label}
