@@ -3,7 +3,7 @@ import { formatCurrency } from '../../../utils/currency';
 
 const BillSummary = ({ items }) => {
   const subtotal = items?.reduce((sum, item) => sum + item?.total, 0);
-  const taxRate = 0.18; // 18% GST
+  const taxRate = 0.08; // 8% tax
   const taxAmount = subtotal * taxRate;
   const total = subtotal + taxAmount;
 
@@ -22,12 +22,12 @@ const BillSummary = ({ items }) => {
           <span className="text-sm md:text-base text-muted-foreground">Subtotal</span>
           <span className="text-base md:text-lg font-medium text-foreground data-text">{formatCurrency(subtotal)}</span>
         </div>
-
+        
         <div className="flex items-center justify-between py-2 md:py-3 border-t border-border">
-          <span className="text-sm md:text-base text-muted-foreground">GST (18%)</span>
+          <span className="text-sm md:text-base text-muted-foreground">Tax (8%)</span>
           <span className="text-base md:text-lg font-medium text-foreground data-text">{formatCurrency(taxAmount)}</span>
         </div>
-
+        
         <div className="flex items-center justify-between py-3 md:py-4 border-t-2 border-border">
           <span className="text-base md:text-lg font-semibold text-foreground">Total Amount</span>
           <span className="text-xl md:text-2xl lg:text-3xl font-bold text-primary data-text">{formatCurrency(total)}</span>
