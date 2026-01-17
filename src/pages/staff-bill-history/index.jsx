@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { ref, onValue, query, orderByChild } from 'firebase/database';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { database } from '../../utils/firebase';
 import RoleTransitionHeader from '../../components/ui/RoleTransitionHeader';
 import OfflineStatusIndicator from '../../components/ui/OfflineStatusIndicator';
@@ -58,23 +58,21 @@ const StaffBillHistory = () => {
 
     try {
       setLoading(true);
-      const billsRef = ref(database, 'bills');
-      const billsQuery = query(billsRef, orderByChild('timestamp'));
+      const billsRef = collection(database, 'bills');
+      const billsQuery = query(billsRef, orderBy('timestamp', 'desc'));
 
-      onValue(billsQuery, (snapshot) => {
-        const data = snapshot?.val();
-        if (data) {
-          const billsArray = Object.keys(data)?.map(key => ({
-            ...data?.[key],
-            firebaseKey: key,
+      const unsubscribe = onSnapshot(billsQuery, (snapshot) => {
+        const billsArray = [];
+        snapshot.forEach((doc) => {
+          billsArray.push({
+            id: doc.id,
+            ...doc.data(),
             synced: true
-          }));
-          setBills(billsArray?.reverse());
-          setFilteredBills(billsArray?.reverse());
-        } else {
-          setBills([]);
-          setFilteredBills([]);
-        }
+          });
+        });
+
+        setBills(billsArray);
+        setFilteredBills(billsArray);
         setLoading(false);
       }, (error) => {
         console.error('Error fetching bills:', error);
@@ -83,6 +81,8 @@ const StaffBillHistory = () => {
         setFilteredBills(localBills);
         setLoading(false);
       });
+
+      return () => unsubscribe();
     } catch (error) {
       console.error('Error setting up Firebase listener:', error);
       const localBills = JSON.parse(localStorage.getItem('offlineBills') || '[]');
@@ -100,7 +100,7 @@ const StaffBillHistory = () => {
     let filtered = [...bills];
 
     if (searchQuery) {
-      filtered = filtered?.filter(bill => 
+      filtered = filtered?.filter(bill =>
         bill?.customerName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
         bill?.id?.toString()?.includes(searchQuery)
       );
@@ -125,7 +125,7 @@ const StaffBillHistory = () => {
     }
 
     if (syncStatusFilter !== 'all') {
-      filtered = filtered?.filter(bill => 
+      filtered = filtered?.filter(bill =>
         syncStatusFilter === 'synced' ? bill?.synced : !bill?.synced
       );
     }

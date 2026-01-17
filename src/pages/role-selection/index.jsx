@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { useAuth } from '../../context/AuthContext';
 import WelcomeHeader from './components/WelcomeHeader';
 import RoleCard from './components/RoleCard';
 import FeaturesList from './components/FeaturesList';
@@ -8,6 +9,7 @@ import OfflineStatusIndicator from '../../components/ui/OfflineStatusIndicator';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const roles = [
@@ -29,8 +31,11 @@ const RoleSelection = () => {
     }
   ];
 
-  const handleRoleSelect = (route) => {
+  const handleRoleSelect = async (route) => {
     setIsTransitioning(true);
+    // Logout first to ensure clean state
+    await logout();
+
     // Determine role string from route for login page
     const roleMap = {
       '/staff-billing': 'staff',
@@ -38,7 +43,7 @@ const RoleSelection = () => {
     };
 
     setTimeout(() => {
-      // Instead of going directly to dashboard, go to login with pre-selected tab
+      // Go to login with pre-selected tab
       navigate('/login', { state: { role: roleMap[route] } });
       setIsTransitioning(false);
     }, 250);

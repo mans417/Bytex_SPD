@@ -96,7 +96,12 @@ export const AuthProvider = ({ children }) => {
         if (auth && currentUser) {
             await signOut(auth);
         }
+        // Clear all auth-related state
+        setCurrentUser(null);
         setUserRole(null);
+        // Clear any localStorage items that might cause conflicts
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('staffAuthenticated');
     };
 
     const value = {

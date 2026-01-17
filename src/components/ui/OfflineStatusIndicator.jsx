@@ -27,13 +27,12 @@ const OfflineStatusIndicator = () => {
   }, []);
 
   return (
-    <div className="fixed top-4 right-4 z-[200]">
+    <div className="fixed top-20 right-4 z-[200]">
       <div
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg transition-all duration-250 ${
-          isOnline
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg transition-all duration-250 ${isOnline
             ? 'bg-success text-success-foreground'
             : 'bg-warning text-warning-foreground'
-        } ${showNotification ? 'animate-slide-in' : ''}`}
+          } ${showNotification ? 'animate-slide-in' : ''}`}
       >
         <div className="relative">
           <Icon
