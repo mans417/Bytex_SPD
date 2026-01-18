@@ -313,9 +313,15 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-**Anshul Barapatre**  
+**Nishant Dharukar**  
+- Email: nishantdharukar7@gmail.com
+**Mansi Raut**  
+- Email: mansiraut131@gmail.com
+**Numesh Barapatrer**  
 - Email: anshulbarapatre729@gmail.com
-
+**Varun Baisaree**
+- Email: 
+  
 ---
 
 ## 🙏 Acknowledgments
