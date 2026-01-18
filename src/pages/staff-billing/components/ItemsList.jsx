@@ -40,8 +40,8 @@ const ItemsList = ({ items, onRemoveItem }) => {
               <tr key={item?.id} className="hover:bg-muted/50 transition-colors">
                 <td className="px-6 py-4 text-sm md:text-base text-foreground font-medium">{item?.name}</td>
                 <td className="px-6 py-4 text-sm md:text-base text-foreground text-right data-text">{item?.quantity}</td>
-                <td className="px-6 py-4 text-sm md:text-base text-foreground text-right data-text">${item?.price?.toFixed(2)}</td>
-                <td className="px-6 py-4 text-sm md:text-base text-foreground font-semibold text-right data-text">${item?.total?.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm md:text-base text-foreground text-right data-text">₹{item?.price?.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm md:text-base text-foreground font-semibold text-right data-text">₹{item?.total?.toFixed(2)}</td>
                 <td className="px-6 py-4 text-center">
                   <Button
                     variant="ghost"
@@ -68,7 +68,7 @@ const ItemsList = ({ items, onRemoveItem }) => {
                 <h3 className="text-base font-semibold text-foreground mb-1 truncate">{item?.name}</h3>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="data-text">Qty: {item?.quantity}</span>
-                  <span className="data-text">@ ${item?.price?.toFixed(2)}</span>
+                  <span className="data-text">@ ₹{item?.price?.toFixed(2)}</span>
                 </div>
               </div>
               <Button
@@ -82,7 +82,7 @@ const ItemsList = ({ items, onRemoveItem }) => {
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-border">
               <span className="text-sm font-medium text-muted-foreground caption">Line Total</span>
-              <span className="text-base font-bold text-foreground data-text">${item?.total?.toFixed(2)}</span>
+              <span className="text-base font-bold text-foreground data-text">₹{item?.total?.toFixed(2)}</span>
             </div>
           </div>
         ))}
