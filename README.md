@@ -311,17 +311,20 @@ This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
-**Nishant Dharukar**  
-- Email: nishantdharukar7@gmail.com
-**Mansi Raut**  
-- Email: mansiraut131@gmail.com
-**Numesh Barapatrer**  
-- Email: anshulbarapatre729@gmail.com
-**Varun Baisaree**
-- Email: 
-  
+- **Nishant Dharukar**  
+  📧 nishantdharukar7@gmail.com
+
+- **Mansi Raut**  
+  📧 mansiraut131@gmail.com
+
+- **Numesh Barapatrer**  
+  📧 anshulbarapatre729@gmail.com
+
+- **Varun Baisaree**  
+  📧 varunbaisaree@example.com
+
 ---
 
 ## 🙏 Acknowledgments
